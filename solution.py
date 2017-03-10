@@ -23,13 +23,43 @@ def naked_twins(values):
     Returns:
         the values dictionary with the naked twins eliminated from peers.
     """
+    new_values = values.copy()
+    naked_twins = []
+    for box in new_values:
+        if len(new_values[box]) == 2:
+            for peer in peers[box]:
+                if box < peer and new_values[peer] == new_values[box]:
+                    naked_twins.append([box, peer])
+    for nt in naked_twins:
+        # Find the units that contains these two naked twins
+        units = [u for u in unitlist if nt[0] in u and nt[1] in u]
+        for unit in units:
+            for box in unit:
+                if box != nt[0] and box != nt[1]:
+                    new_values[box] = new_values[box].replace(new_values[nt[0]][0], '')
+                    new_values[box] = new_values[box].replace(new_values[nt[0]][1], '')
+    if len([box for box in new_values.keys() if len(new_values[box]) == 0]):
+        return False
+    return new_values
 
     # Find all instances of naked twins
     # Eliminate the naked twins as possibilities for their peers
 
 def cross(A, B):
     "Cross product of elements in A and elements in B."
-    return [s+t for s in a for t in b]
+    return [s+t for s in A for t in B]
+
+digits   = '123456789'
+rows     = 'ABCDEFGHI'
+cols     = digits
+boxes = cross(rows, cols)
+unitlist = ([cross(rows, c) for c in cols] +
+            [cross(r, cols) for r in rows] +
+            [cross(rs, cs) for rs in ('ABC','DEF','GHI') for cs in ('123','456','789')])
+units = dict((s, [u for u in unitlist if s in u])
+             for s in boxes)
+peers = dict((s, set(sum(units[s],[]))-set([s]))
+             for s in boxes)
 
 def grid_values(grid):
     """
@@ -129,6 +159,7 @@ def solve(grid):
     Returns:
         The dictionary representation of the final sudoku grid. False if no solution exists.
     """
+    return search(grid_values(grid))
 
 if __name__ == '__main__':
     diag_sudoku_grid = '2.............62....1....7...6..8...3...9...7...6..4...4....8....52.............3'
