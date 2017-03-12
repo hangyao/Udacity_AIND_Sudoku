@@ -3,17 +3,19 @@
 
 # Question 1 (Naked Twins)
 Q: How do we use constraint propagation to solve the naked twins problem?  
-A: *Student should provide answer here*
+A: Constraint Propagation is used here since the naked twins algorithm actually creates a constraint in the sudoku. This constraint says the following: If one unit contains two boxes that have two available values i and j, then the values i and j need to be removed from all the available values of all the other boxes in that same unit.
+
+This is a constraint that can be iterated and propagated in the sudoku, which will help us reach the solution.
 
 # Question 2 (Diagonal Sudoku)
 Q: How do we use constraint propagation to solve the diagonal sudoku problem?  
-A: *Student should provide answer here*
+A: In order to solve a diagonal sudoku, we need to expand the constraints in the original sudoku. The way we expand them is to add the two diagonals to the set of units. This will add constraints to our algorithm, and help us reach the solution to the diagonal sudoku.
 
 ### Install
 
 This project requires **Python 3**.
 
-We recommend students install [Anaconda](https://www.continuum.io/downloads), a pre-packaged Python distribution that contains all of the necessary libraries and software for this project. 
+We recommend students install [Anaconda](https://www.continuum.io/downloads), a pre-packaged Python distribution that contains all of the necessary libraries and software for this project.
 Please try using the environment we provided in the Anaconda lesson of the Nanodegree.
 
 ##### Optional: Pygame
@@ -32,4 +34,3 @@ If not, please see how to download pygame [here](http://www.pygame.org/download.
 ### Visualizing
 
 To visualize your solution, please only assign values to the values_dict using the ```assign_values``` function provided in solution.py
-
