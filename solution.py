@@ -23,12 +23,11 @@ def naked_twins(values):
     Returns:
         the values dictionary with the naked twins eliminated from peers.
     """
-    new_values = values.copy()
     naked_twins = []
-    for box in new_values:
-        if len(new_values[box]) == 2:
+    for box in values:
+        if len(values[box]) == 2:
             for peer in peers[box]:
-                if box < peer and new_values[peer] == new_values[box]:
+                if box < peer and values[peer] == values[box]:
                     naked_twins.append([box, peer])
     for nt in naked_twins:
         # Find the units that contains these two naked twins
@@ -36,11 +35,13 @@ def naked_twins(values):
         for unit in units:
             for box in unit:
                 if box != nt[0] and box != nt[1]:
-                    new_values[box] = new_values[box].replace(new_values[nt[0]][0], '')
-                    new_values[box] = new_values[box].replace(new_values[nt[0]][1], '')
-    if len([box for box in new_values.keys() if len(new_values[box]) == 0]):
+                    #new_values[box] = new_values[box].replace(new_values[nt[0]][0], '')
+                    values = assign_value(values, box, values[box].replace(values[nt[0]][0], ''))
+                    #new_values[box] = new_values[box].replace(new_values[nt[0]][1], '')
+                    values = assign_value(values, box, values[box].replace(values[nt[0]][1], ''))
+    if len([box for box in values.keys() if len(values[box]) == 0]):
         return False
-    return new_values
+    return values
 
     # Find all instances of naked twins
     # Eliminate the naked twins as possibilities for their peers
@@ -59,6 +60,14 @@ unitlist = ([cross(rows, c) for c in cols] +
 units = dict((s, [u for u in unitlist if s in u])
              for s in boxes)
 peers = dict((s, set(sum(units[s],[]))-set([s]))
+             for s in boxes)
+
+diagonal1 = [a[0]+a[1] for a in zip(rows, cols)]
+diagonal2 = [a[0]+a[1] for a in zip(rows, cols[::-1])]
+diag_unitlist = unitlist + [diagonal1, diagonal2]
+diag_units = dict((s, [u for u in diag_unitlist if s in u])
+             for s in boxes)
+diag_peers = dict((s, set(sum(units[s],[]))-set([s]))
              for s in boxes)
 
 def grid_values(grid):
@@ -93,22 +102,24 @@ def display(values):
         print(''.join(values[r+c].center(width)+('|' if c in '36' else '')
                       for c in cols))
         if r in 'CF': print(line)
-    print
+    print()
 
 def eliminate(values):
     solved_values = [box for box in values.keys() if len(values[box]) == 1]
     for box in solved_values:
         digit = values[box]
-        for peer in peers[box]:
-            values[peer] = values[peer].replace(digit,'')
+        for peer in diag_peers[box]:
+            #values[peer] = values[peer].replace(digit,'')
+            values = assign_value(values, peer, values[peer].replace(digit,''))
     return values
 
 def only_choice(values):
-    for unit in unitlist:
+    for unit in diag_unitlist:
         for digit in '123456789':
             dplaces = [box for box in unit if digit in values[box]]
             if len(dplaces) == 1:
-                values[dplaces[0]] = digit
+                #values[dplaces[0]] = digit
+                values = assign_value(values, dplaces[0], digit)
     return values
 
 def reduce_puzzle(values):
@@ -116,12 +127,9 @@ def reduce_puzzle(values):
     while not stalled:
         # Check how many boxes have a determined value
         solved_values_before = len([box for box in values.keys() if len(values[box]) == 1])
-
-        # Your code here: Use the Eliminate Strategy
         values = eliminate(values)
-
-        # Your code here: Use the Only Choice Strategy
         values = only_choice(values)
+        values = naked_twins(values)
 
         # Check how many boxes have a determined value, to compare
         solved_values_after = len([box for box in values.keys() if len(values[box]) == 1])
